@@ -77,9 +77,9 @@ public class RotorsPanel extends JPanel{
 	
 	private TitledBorder titleBorders[] = {
 			BorderFactory.createTitledBorder("Reflector"),
-			BorderFactory.createTitledBorder("Left Rotor"),
-			BorderFactory.createTitledBorder("Center Rotor"),
-			BorderFactory.createTitledBorder("Right Rotor"),
+			BorderFactory.createTitledBorder("First Rotor"),
+			BorderFactory.createTitledBorder("Second Rotor"),
+			BorderFactory.createTitledBorder("Third Rotor"),
 			BorderFactory.createTitledBorder("State")
 	};
 	

@@ -45,47 +45,38 @@ public class EncodePanel extends JPanel{
 	private TypeListener typeListener;
 	
 	public EncodePanel() {
-		
-		// Set layout
 		setLayout(new GridLayout());
-		
-		// Adding borders
+
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
 		setBorder(outerBorder);
 
-		// JTextArea
 		inputText = new JTextArea();
 		outputText = new JTextArea();
 		processText = new JTextArea();
 		spInput = new JScrollPane(inputText);
 		spOutput = new JScrollPane(outputText);
 		spProcess = new JScrollPane(processText);
-		
-		// Set Border
+
 		spInput.setBorder(BorderFactory.createCompoundBorder(outerBorder, BorderFactory.createTitledBorder("Input")));
 		spInput.setBackground(Color.white);
 		spOutput.setBorder(BorderFactory.createCompoundBorder(outerBorder, BorderFactory.createTitledBorder("Output")));
 		spOutput.setBackground(Color.white);
 		spProcess.setBorder(BorderFactory.createCompoundBorder(outerBorder, BorderFactory.createTitledBorder("Process")));
 		spProcess.setBackground(Color.white);
-		
-		// Configure output
+
 		outputText.setEditable(false);
 		processText.setEditable(false);
-		
-		// Splitter
+
 		JSplitPane topSplitter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, spOutput, spProcess);
 		JSplitPane splitter = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topSplitter, spInput);
 		splitter.setResizeWeight(0.5);
 		splitter.setDividerSize(10);
 		splitter.setContinuousLayout(true);
 
-		// Set Border
 		inputText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		outputText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		processText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		
-		// Allow Undo & Redo
+
 		final UndoManager undoManager = new UndoManager();
 		Document doc = inputText.getDocument();
 		doc.addUndoableEditListener(new UndoableEditListener() {
@@ -115,20 +106,12 @@ public class EncodePanel extends JPanel{
 		        } catch (CannotUndoException exp) {}
 		    }
 		});
-		
-		
-		// Add component
 		add(splitter);
-		
-		// Filter input to upper case only
 		( (AbstractDocument) inputText.getDocument() ).setDocumentFilter(new DocumentFilter(){
 			public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
 				for (int i = 0; i < text.length(); i++) 
-					// If not a letter, white space or new line, then return
 					if( (text.charAt(i) < 'a' || text.charAt(i) > 'z') && (text.charAt(i) < 'A' || text.charAt(i) > 'Z') && text.charAt(i) != ' ' && text.charAt(i) != '\n')
 						return;
-				
-				// Convert to upper case and add text
 				text = text.toUpperCase();
 				super.replace(fb, offset, length, text, attrs);
 			}
@@ -138,7 +121,7 @@ public class EncodePanel extends JPanel{
 		inputText.getDocument().addDocumentListener(new DocumentListener() {
 			public void removeUpdate(DocumentEvent e) {
 				enigma.resetRotation();
-				EnigmaOutput result = enigma.type(inputText.getText());
+				EnigmaOutput result = enigma.encrypt(inputText.getText());
 				String output = result.getOutput();
 				String process = result.getProcess();
 				outputText.setText(output);
@@ -148,7 +131,7 @@ public class EncodePanel extends JPanel{
 			
 			public void insertUpdate(DocumentEvent e) {
 				enigma.resetRotation();
-				EnigmaOutput result = enigma.type(inputText.getText());
+				EnigmaOutput result = enigma.encrypt(inputText.getText());
 				String output = result.getOutput();
 				String process = result.getProcess();
 				outputText.setText(output);

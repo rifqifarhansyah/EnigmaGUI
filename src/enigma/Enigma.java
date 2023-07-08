@@ -47,7 +47,7 @@ public class Enigma {
 	}
 	
 	// Encode
-	public EnigmaOutput type(String text){
+	public EnigmaOutput encrypt(String text){
 		String output = "";
 		String process = "";
 		RotorEncrypt result;
@@ -70,12 +70,34 @@ public class Enigma {
 		return new EnigmaOutput(output, process);
 	}
 
+	public EnigmaOutput decrypt(String text){
+		String output = "";
+		String process = "";
+		RotorEncrypt result;
+		for (int i = 0; i <text.length(); i++) {
+			// Karakter harus uppercase
+			if (text.charAt(i) >= 'A' && text.charAt(i) <= 'Z') {
+				result = rotorsDecryption(text.charAt(i));
+				output += result.getOutput();
+				process += result.getProcess();
+			}
+			// Karakter Spasi dan Newline tidak di encode
+			else if (text.charAt(i) == ' ' || text.charAt(i) == '\n') {
+				output += text.charAt(i);
+			}
+			// Karakter lainnya
+			else {
+				throw new RuntimeException("Only upper case letters allowed!");
+			}
+		}
+		
+		return new EnigmaOutput(output, process);
+	}
 
 	private RotorEncrypt rotorsEncryption(char inputC){
 		String process = "";
 		process += "Keyboard Input: " + inputC + "\n";
 		process += "Rotors Position: " + leftRotor.getRotorHead() + centerRotor.getRotorHead() + rightRotor.getRotorHead() + "\n";
-
 		if (centerRotor.getNotch() == centerRotor.getRotorHead()){
 			leftRotor.rotate();
 			centerRotor.rotate();
@@ -90,6 +112,7 @@ public class Enigma {
 
 		if(plugboard[input] != -1)
 			input = plugboard[input];
+
 		char plugboardEncryption = (char) (input + 'A');
 		process += "Plugboard Encryption: " + plugboardEncryption + "\n";
 
@@ -124,11 +147,75 @@ public class Enigma {
 		if(plugboard[inOfrightRotor] != -1)
 			inOfrightRotor = plugboard[inOfrightRotor];
 		char reversedPlugboardEncryption = (char)(inOfrightRotor+'A');
+
 		process += "Plugboard Encryption: " + reversedPlugboardEncryption + "\n";
 		process += "Output (Lampboard): " + reversedPlugboardEncryption + "\n";
-		process += "-----------------------------" + "\n";
+		process += "---------------------------------" + "\n";
 		return new RotorEncrypt(reversedPlugboardEncryption, process);
 	}
+
+	private RotorEncrypt rotorsDecryption(char inputC) {
+		String process = "";
+		process += "Keyboard Input: " + inputC + "\n";
+		process += "Rotors Position: " + leftRotor.getRotorHead() + centerRotor.getRotorHead() + rightRotor.getRotorHead() + "\n";
+
+		if (centerRotor.getNotch() == centerRotor.getRotorHead()){
+			leftRotor.rotate();
+			centerRotor.rotate();
+		}
+
+		if (rightRotor.getNotch() == rightRotor.getRotorHead())
+			centerRotor.rotate();
+
+		rightRotor.rotate();
+
+		int input = inputC - 'A';
+
+		if(plugboard[input] != -1)
+			input = plugboard[input];
+
+		char plugboardEncryption = (char) (input + 'A');
+		process += "Plugboard Decryption: " + plugboardEncryption + "\n";
+
+		int outOfrightRotor = rightRotor.getOutputOf(input);
+		char outOfRightRotorChar = (char) (outOfrightRotor + 'A');
+		process += "Wheel 3 Decryption: " + outOfRightRotorChar + "\n";
+
+		int outOfcenterRotor = centerRotor.getOutputOf(outOfrightRotor);
+		char outOfCenterRotorChar = (char) (outOfcenterRotor + 'A');
+		process += "Wheel 2 Decryption: " + outOfCenterRotorChar + "\n";
+
+		int outOfleftRotor = leftRotor.getOutputOf(outOfcenterRotor);
+		char outOfLeftRotorChar = (char) (outOfleftRotor + 'A');
+		process += "Wheel 1 Decryption: " + outOfLeftRotorChar + "\n";
+
+		int outOfReflector = reflector.getOutputOf(outOfleftRotor);
+		char outOfRefelctorChar = (char) (outOfReflector + 'A');
+		process += "Reflector Decryption: " + outOfRefelctorChar + "\n";
+
+		int inOfleftRotor = leftRotor.getInputOf(outOfReflector);
+		char inOfLeftRotorChar = (char) (inOfleftRotor + 'A');
+		process += "Wheel 1 Decryption: " + inOfLeftRotorChar + "\n";
+
+		int inOfcenterRotor = centerRotor.getInputOf(inOfleftRotor);
+		char inOfCenterRotorChar = (char) (inOfcenterRotor + 'A');
+		process += "Wheel 2 Decryption: " + inOfCenterRotorChar + "\n";
+
+		int inOfrightRotor = rightRotor.getInputOf(inOfcenterRotor);
+		char inOfRightRotorChar = (char) (inOfrightRotor + 'A');
+		process += "Wheel 3 Decryption: " + inOfRightRotorChar + "\n";
+
+		if(plugboard[inOfrightRotor] != -1)
+			inOfrightRotor = plugboard[inOfrightRotor];
+		char reversedPlugboardEncryption = (char)(inOfrightRotor+'A');
+
+		process += "Plugboard Decryption: " + reversedPlugboardEncryption + "\n";
+		process += "Output (Lampboard): " + reversedPlugboardEncryption + "\n";
+		process += "---------------------------------" + "\n";
+		return new RotorEncrypt(reversedPlugboardEncryption, process);
+	}
+	
+	
 
 	public Rotor getLeftRotor(){
 		return leftRotor;
@@ -150,9 +237,23 @@ public class Enigma {
 		return this.plugboard[a];
 	}
 
+	public void insertPlugboardWire(char a, char b){
+		this.plugboard[ a - 'A' ] = b - 'A';
+		this.plugboard[ b - 'A' ] = a - 'A';
+	}
+
+	public void removePlugboardWire(char a){
+		this.plugboard[ this.plugboard[ a - 'A' ] ] = -1;
+		this.plugboard[ a - 'A' ] = -1;
+	}
+
 	public void resetPlugboard(){
 		for (int wire = 0; wire < 26; wire++)
 			this.plugboard[ wire ] = -1;
+	}
+
+	public boolean isPlugged(char c){
+		return plugboard[c - 'A'] != -1;
 	}
 
 	public void resetRotation(){

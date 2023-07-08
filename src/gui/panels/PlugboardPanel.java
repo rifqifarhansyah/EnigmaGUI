@@ -25,7 +25,7 @@ public class PlugboardPanel extends JPanel{
 		
 		// Tambah Border
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
-		innerBorder = BorderFactory.createTitledBorder("Plugboard (example: AB CD) - Press \"SET\"");
+		innerBorder = BorderFactory.createTitledBorder("Plugboard (example: AB CD)");
 		setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 		
 		// Tambah Komponen

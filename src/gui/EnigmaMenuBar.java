@@ -10,6 +10,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
+import javax.swing.Action;
+import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -67,8 +69,32 @@ public class EnigmaMenuBar {
 		file.add(exit);
 		JRadioButtonMenuItem textBox = new JRadioButtonMenuItem("Text box");
 		textBox.setSelected(true);
+
+		JMenu display = new JMenu("Display");
+		ButtonGroup displayGroup = new ButtonGroup();
+		JRadioButtonMenuItem encrypt = new JRadioButtonMenuItem("Encrypt");
+		JRadioButtonMenuItem decrypt = new JRadioButtonMenuItem("Decrypt");
+		textBox.setSelected(true);
+		displayGroup.add(encrypt);
+		displayGroup.add(decrypt);
+		display.add(encrypt);
+		display.add(decrypt);
+
 		menuBar.add(file);
+		menuBar.add(display);
 		
+		encrypt.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0){
+				emlistener.encryptDisplay();
+			}
+		});
+
+		decrypt.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0){
+				emlistener.decryptDisplay();
+			}
+		});
+
 		restart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				emlistener.restart();
@@ -123,12 +149,9 @@ public class EnigmaMenuBar {
 
 				String text = emlistener.exportFile();
 				if(text.isEmpty()){
-					JOptionPane.showMessageDialog(frame, "You can't export an empty output");
+					JOptionPane.showMessageDialog(frame, "You can't export an empty file");
 					return;
 
-				} else if(text.equals("-1")){
-					JOptionPane.showMessageDialog(frame, "You can't export a text in this display");
-					return;
 				}
 
 				if(lastFile != null)
